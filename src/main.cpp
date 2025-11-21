@@ -8,6 +8,7 @@
 #include<algorithm>
 #include<cctype>
 
+
 int main()
 {
     std::cout<<"===Chat v0.1==="<<std::endl<<std::endl;
@@ -23,15 +24,17 @@ int main()
     // 用户加入聊天室
     room.addUser(user01);
     room.addUser(user02);
+    room.addUser(user03);
 
     // test循环
     std::string input;
     std::cout<<"\n欢迎回来，管理员"<<std::endl;
     while(std::getline(std::cin,input))
     {
-	    std::transform(input.begin(),input.end(),input.begin(),::tolower);
-	    if(input.empty())break;
-	    if(input.find("login")==0)
+	    std::string command=input;
+	    std::transform(command.begin(),command.end(),command.begin(),::tolower);
+	    if(command.empty())break;
+	    if(command.find("login")==0)
 	    {
 		    // 对输入的命令进行正确判断
 		    if(input.length()<=6)
@@ -46,7 +49,7 @@ int main()
 		    if(!userID.empty()&&userID.find_first_not_of(" ")!=std::string::npos)std::cout<<"尝试登录用户："<<userID<<std::endl;// 以“login”开头
 		    room.userLogin(userID);
 	    }
-	    else if(input.find("logout")==0)
+	    else if(command.find("logout")==0)
 	    {
 		    if(input.length()<=6)
                     {
@@ -60,21 +63,60 @@ int main()
 		    if(!userID.empty()&&userID.find_first_not_of(" ")!=std::string::npos)std::cout<<"尝试登出用户："<<userID<<std::endl;
 		    room.userLogout(userID);
 	    }
-	    else if(input=="online")
+	    else if(command=="online")
 	    {
 		    room.displayOnlineUsers();
 	    }
-	    else std::cout<<"有人发来消息\n"<<input<<std::endl<<std::endl;
+	    // 显示所有在线用户
+	    else if(command.find("switch to")==0)
+	    {
+		    if(input.length()<=9)
+		    {
+			    std::cout<<"错误：请指定转换的模式。示例：switch to admin\n"<<std::endl;
+			    continue;
+		    }
+		    std::string mode=input.substr(10);
+		    mode.erase(0,mode.find_first_not_of(" "));
+
+		    if(mode=="admin")
+		    {
+			    room.switchToAdminMode();
+			    continue;
+		    }
+		    // 管理员mode
+		    if(command.find("switch to user")==0)
+		    {
+			    mode=input.substr(15);
+			    mode.erase(0,mode.find_first_not_of(" "));
+			    room.switchToUserMode(mode);
+		    }
+		    else
+		    {
+			    std::cout<<"错误：格式不正确。示例：switch to user userID\n"<<std::endl;
+		    }
+	    }
+	    // 转换模式以发言
+	    else if(command=="statue")
+	    {
+		    if(room.isAdminMode())
+		    {
+			    std::cout<<"you are in admin mode\n"<<std::endl;
+		    }
+		    else
+		    {
+			    std::shared_ptr<User> user=room.getCurrentUser();
+			    std::cout<<"you are in user mode , userID: "<<user->getID()<<std::endl<<std::endl;
+		    }
+	    }
+	    // 查看当前模式
+	    else if(command=="exit")break;
+	    // 退出
+	    else
+	    {
+		    room.sendMessage(input);
+	    }
+	    // else用来发送信息
     }
-
-
-    // 模拟聊天
-    room.sendMessage(user01,"英雄形态的宵宫姐姐登场！\n");
-    room.sendMessage(user02,"我是对空六科的星见雅\n");
-
-    room.addUser(user03);
-    room.sendMessage(user01,"\n欢迎新人加入！\n");
-    room.sendMessage(user03,"大家好！我是桃金娘。小苹果，今天就拜托你了\n");
 
     // 显示所有消息
     room.displayMessages();

@@ -1,0 +1,10 @@
+online
+Login
+我能说话吗
+login 01
+switch to 01
+英雄形态的宵宫姐姐登场！
+online
+logout 01
+logout 02
+login 03
